@@ -1,10 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { analyzeImage, ANALYSIS_PROMPT } from '../lib/gemini';
+import { analyzeImage, PROMPTS } from '../lib/gemini';
 
 export default function ResultScreen() {
-  const { base64Image } = useLocalSearchParams();
+  const { base64Image, promptKey } = useLocalSearchParams();
   const router = useRouter();
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,7 +13,8 @@ export default function ResultScreen() {
   useEffect(() => {
     async function analyze() {
       try {
-        const response = await analyzeImage(base64Image, ANALYSIS_PROMPT);
+        const prompt = PROMPTS[promptKey] || PROMPTS.academic;
+        const response = await analyzeImage(base64Image, prompt);
         console.log('Gemini response:', JSON.stringify(response));
         const text = response.candidates[0].content.parts[0].text;
         const clean = text.replace(/```json|```/g, '').trim();
@@ -52,6 +53,7 @@ export default function ResultScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <Text style={styles.heading}>Analysis Result</Text>
+      <Text style={styles.personaTag}>{promptKey?.toUpperCase() || 'ACADEMIC'} ANALYSIS</Text>
 
       <View style={styles.card}>
         <Text style={styles.label}>Objects</Text>
@@ -78,7 +80,7 @@ export default function ResultScreen() {
         <Text style={styles.item}>{result.recommendations}</Text>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/CameraScreen')}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/')}>
         <Text style={styles.buttonText}>Take Another Photo</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -89,7 +91,14 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F6FA' },
   contentContainer: { padding: 20, paddingTop: 60, paddingBottom: 40 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: '#F5F6FA' },
-  heading: { fontSize: 26, fontWeight: 'bold', color: '#1F2A44', marginBottom: 20 },
+  heading: { fontSize: 26, fontWeight: 'bold', color: '#1F2A44', marginBottom: 4 },
+  personaTag: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#5B3FA3',
+    letterSpacing: 1,
+    marginBottom: 20,
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,

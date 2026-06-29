@@ -6,21 +6,30 @@ export default function PreviewScreen() {
   const { photoUri } = useLocalSearchParams();
   const router = useRouter();
 
-  async function handleAnalyze() {
+  async function handleAnalyze(promptKey) {
     const base64Image = await imageToBase64(photoUri);
-    console.log("base64 length:", base64Image.length); // temporary check
-    router.push({ pathname: '/ResultScreen', params: { base64Image } });
+    router.push({ pathname: '/ResultScreen', params: { base64Image, promptKey } });
   }
 
   return (
     <View style={styles.container}>
       <Image source={{ uri: photoUri }} style={styles.preview} resizeMode="contain" />
+
+      <View style={styles.personaRow}>
+        <TouchableOpacity style={styles.personaButton} onPress={() => handleAnalyze('academic')}>
+          <Text style={styles.personaButtonText}>Academic</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.personaButton} onPress={() => handleAnalyze('safety')}>
+          <Text style={styles.personaButtonText}>Safety</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.personaButton} onPress={() => handleAnalyze('inventory')}>
+          <Text style={styles.personaButtonText}>Inventory</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.actionRow}>
         <TouchableOpacity style={styles.retakeButton} onPress={() => router.back()}>
           <Text style={styles.buttonText}>Retake</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.analyzeButton} onPress={handleAnalyze}>
-          <Text style={styles.buttonText}>Analyze</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -30,8 +39,27 @@ export default function PreviewScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
   preview: { flex: 1 },
-  actionRow: { flexDirection: 'row', justifyContent: 'space-around', padding: 20 },
-  retakeButton: { backgroundColor: '#5A6472', padding: 14, borderRadius: 8 },
-  analyzeButton: { backgroundColor: '#5B3FA3', padding: 14, borderRadius: 8 },
-  buttonText: { color: '#fff', fontWeight: 'bold' },
+  personaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    gap: 8,
+  },
+  personaButton: {
+    backgroundColor: '#5B3FA3',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    flex: 1,
+  },
+  personaButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 13,
+  },
+  actionRow: { flexDirection: 'row', justifyContent: 'center', padding: 20 },
+  retakeButton: { backgroundColor: '#5A6472', padding: 14, borderRadius: 8, minWidth: 140 },
+  buttonText: { color: '#fff', fontWeight: 'bold', textAlign: 'center' },
 });
